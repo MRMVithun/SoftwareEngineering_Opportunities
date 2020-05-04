@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Student Opportunities</title>
+        <meta charset="utf-8">
+        <link rel="stylesheet" type="text/css" href="https://se.penkra.com/style.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Manrope">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script src="https://se.penkra.com/apis/account.js"></script>
+        <link rel="stylesheet" href="style.css">
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $("#user_image").text(getUserData("firstname").substring(0, 1) + getUserData("lastname").substring(0, 1));
+                fetchPosts();
+            });
+            
+            function fetchPosts(){
+                $.post('fetch-opportunities.php', {}, function(msg){
+                    const m = JSON.parse(msg);
+                    m.posts.forEach(function(p){
+                        const n = getOneUser(p.uid);
+                        var t = '<div class="each generic"><div class="top-level"><div class="image">'+n.fname.substring(0, 1) + n.lname.substring(0, 1) + '</div><div class="space"></div><div class="top-detail"><div class="txt">'+n.fname + ' '+n.lname+'</div><div class="txt-small">'+p.date+'</div></div></div><div class="space"></div><div class="txt-large">'+p.post+'</div><div class="space"></div><a href="'+p.link+'" target="_blank"><button class="action-btns">Apply</button></a><button class="action-btns" onclick="copyToClipboard(\'http://sidmade.com/vithun/view.html?post='+p.id+'\');">Share</button>';
+                        if (getUserData('id') == p.uid || getUserData('isTeacher')) t += '<a href="post.html?post='+p.id+'"><button class="action-btns">Edit</button></a>';
+                        t += '</div>';
+                        $("#posts").prepend(t);
+                    });
+                });
+            }
+            
+            function copyToClipboard(text) {
+                window.prompt("Copy the link below to share with friends", text);
+            }
+        </script>
+    </head>
+    <body>
+        <div id="main-div">
+            <div id="inner-div">
+                <a href="post.html"><div style="display: flex;" class="generic">
+                    <div class="image" id="user_image">
+                        
+                    </div>
+                    <div class="space"></div>
+                    <div class="txt">Post an Opportunity</div>
+                </div></a>
+                <div id="posts">
+                    
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

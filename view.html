@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>View Opportunity</title>
+        <meta charset="utf-8">
+        <link rel="stylesheet" type="text/css" href="https://se.penkra.com/style.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Manrope">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script src="https://se.penkra.com/apis/account.js"></script>
+        <link rel="stylesheet" href="style.css">
+        <script type="text/javascript">
+            var post, link;
+            
+            $(document).ready(function(){
+                fetchPost();
+            });
+            
+            function fetchPost(){
+                const url_string = window.location.href;
+                const url = new URL(url_string);
+                const p = url.searchParams.get("post");
+                if(p != null){
+                    post = p;
+                    $.post('get-opportunity.php', {post : post}, function(msg){
+                        const m = JSON.parse(msg);
+                        const u = getOneUser(m.uid);
+                        setUpUser(u.fname, u.lname);
+                        $("#text_field").text(m.post);
+                        link = m.link;
+                        if (getUserData('id') == m.uid || getUserData('isTeacher')) $("#edit_btn").show();
+                    });
+                }
+            }
+            
+            function setUpUser($fname, $lname){
+                $("#user_name").text($fname + " " + $lname);
+                $("#user_image").text($fname.substring(0, 1) + $lname.substring(0, 1));
+            }
+            
+            function apply(){
+                window.open(link);
+            }
+            
+            function share(){
+                window.prompt("Copy the link below to share with friends", "http://sidmade.com/vithun/view.html?post=" + post);
+            }
+            
+            function edit(){
+                location.href = 'post.html?post=' + post;
+            }
+        </script>
+    </head>
+    <body>
+        <div id="main-div">
+            <div id="inner-div">
+                <div class="space"></div>
+                <a href="../vithun"><img id="back-btn" src="left-arrow.png"></a>
+                <div class="each generic">
+                    <div class="top-level">
+                        <div class="image" id="user_image">
+                            
+                        </div>
+                        <div class="space"></div>
+                        <div class="top-detail">
+                            <div class="txt" id="user_name">
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space"></div>
+                    <div class="txt-large" id="text_field"></div>
+                    <div class="space"></div>
+                    <button class="action-btns" onclick="apply();">Apply</button>
+                    <button class="action-btns" onclick="share();">Share</button>
+                    <button style="display:none" class="action-btns" onclick="edit();" id="edit_btn">Edit</button>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

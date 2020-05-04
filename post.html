@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Post New Opportunity</title>
+        <meta charset="utf-8">
+        <link rel="stylesheet" type="text/css" href="https://se.penkra.com/style.css">
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Manrope">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script src="https://se.penkra.com/apis/account.js"></script>
+        <link rel="stylesheet" href="style.css">
+        <script type="text/javascript">
+            var post = 0;
+            
+            $(document).ready(function(){
+                setUpUser(getUserData("firstname"), getUserData("lastname"));
+                checkForEditing();
+            });
+            
+            function setUpUser($fname, $lname){
+                $("#user_name").text($fname + " " + $lname);
+                $("#user_image").text($fname.substring(0, 1) + $lname.substring(0, 1));
+            }
+            
+            function checkForEditing(){
+                const url_string = window.location.href;
+                const url = new URL(url_string);
+                const p = url.searchParams.get("post");
+                if(p != null){
+                    post = p;
+                    $.post('get-opportunity.php', {post : post}, function(msg){
+                        const m = JSON.parse(msg);
+                        const u = getOneUser(m.uid);
+                        setUpUser(u.fname, u.lname);
+                        $("#user_name").append(" (Editing)");
+                        $("#text_field").val(m.post);
+                        $("#link").val(m.link);
+                        $("#post_btn").text("Update");
+                    });
+                }
+            }
+            
+            function autogrow(e){
+                // if(element.scrollHeight + 5 < 245){
+                    e.style.height = "5px";
+                    e.style.height = (e.scrollHeight + 15)+"px";
+                // }
+                if(e.scrollHeight + 15 > 245){
+                    e.style.height = "245px";
+                    $(e).scrollTop($(e)[0].scrollHeight);
+                }
+            }
+            
+            function isURL(str) {
+                try {
+                    new URL(str);
+                } catch (_) {
+                    return false;  
+                }
+                
+                return true;
+            }
+            
+            function posto(){
+                const text = $("#text_field").val().trim();
+                const link = $("#link").val().trim();
+                if (text == "") alert("Please type something to post");
+                else if (!isURL(link)) alert("Please paste a valid link");
+                else $.post('post-opportunity.php', {post: post, text: text, link: link, uid: getUserData('id')}, function(msg){
+                    const m = JSON.parse(msg);
+                    if(m._status == 0) alert(m._error);
+                    else location.href = '../vithun';
+                });
+            }
+        </script>
+        <style>
+            textarea, input {
+                width: 100%;
+                outline: none;
+            }
+            
+            textarea {
+                border: none;
+                resize: none;
+            }
+            
+            #link {
+                color: blue;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="main-div">
+            <div id="inner-div">
+                <div class="space"></div>
+                <a href="../vithun"><img id="back-btn" src="left-arrow.png"></a>
+                <div class="each generic">
+                    <div class="top-level">
+                        <div class="image" id="user_image">
+                            
+                        </div>
+                        <div class="space"></div>
+                        <div class="top-detail">
+                            <div class="txt" id="user_name">
+                                
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space"></div>
+                    <textarea class="txt-large" id="text_field" maxlength="250" oninput="autogrow(this);" placeholder="Start typing here (Max is 250 characters)"></textarea>
+                    <input id="link" placeholder="Paste Link to Apply here...">
+                    <div class="space"></div>
+                    <button class="action-btns" id="post_btn" onclick="posto();">Post</button>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>
